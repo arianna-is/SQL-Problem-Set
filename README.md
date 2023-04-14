@@ -31,5 +31,5 @@ English: The student with ID1 is friends with the student with ID2. Friendship i
 
 Likes ( ID1, ID2 ) 
 English: The student with ID1 likes the student with ID2. Liking someone is not necessarily mutual, so if (123, 456) is in the Likes table, there is no guarantee that (456, 123) is also present. 
-------------------------------------------------------------------------------------------------------------------------------------------------
+
 
