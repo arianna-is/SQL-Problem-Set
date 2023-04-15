@@ -136,18 +136,35 @@ FROM (
 
 -- 4. Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. Do not count Cassandra, even though technically she is a friend of a friend.
 
-
--- this one isnt right I need to control for not counting cassandra when I look at friends of friends
-SELECT COUNT(*)
-FROM Friend
-WHERE ID1 IN (
-  SELECT ID2
-  FROM Friend
+SELECT ff + f
+FROM (
+  -- find the number of friends of friends of Cassandra
+  SELECT COUNT(*) ff
+  FROM Friend 
   WHERE ID1 IN (
+    SELECT ID2
+    FROM Friend
+    WHERE ID1 = (
+      SELECT ID
+      FROM Highschooler
+      WHERE name = 'Cassandra'
+    )
+  ) 
+      -- exclude counting Cassandra as a friend of a friend
+  AND ID2 <> (
     SELECT ID
     FROM Highschooler
     WHERE name = 'Cassandra'
   )
+)
+JOIN (
+  -- count friends of Cassandra
+ SELECT COUNT(ID2) f
+ FROM Friend
+ WHERE ID1 = (
+    SELECT ID
+    FROM Highschooler
+    WHERE name = 'Cassandra')
 );
 
 
