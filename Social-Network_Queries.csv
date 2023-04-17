@@ -6,7 +6,7 @@ JOIN friend f ON h.ID = f.ID1
 WHERE f.ID2 IN (
 	SELECT ID 
 	FROM highschooler 
-	WHERE name = "Gabriel"
+	WHERE name = 'Gabriel'
 );
 
 
