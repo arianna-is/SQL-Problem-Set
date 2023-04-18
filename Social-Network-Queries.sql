@@ -4,9 +4,9 @@ SELECT h.name
 FROM highschooler h
 JOIN friend f ON h.ID = f.ID1
 WHERE f.ID2 IN (
-	SELECT ID 
-	FROM highschooler 
-	WHERE name = 'Gabriel'
+  SELECT ID 
+  FROM highschooler 
+  WHERE name = 'Gabriel'
 );
 
 
@@ -34,11 +34,11 @@ WHERE h1.name < h2.name;
 SELECT name, grade
 FROM highschooler
 WHERE id NOT IN  (
-	SELECT ID1 
+  SELECT ID1 
   FROM likes
 )
 AND id NOT IN (
-	SELECT ID2 
+  SELECT ID2 
   FROM likes
 );
 
@@ -50,7 +50,7 @@ FROM highschooler h1
 JOIN likes l1 ON h1.id = l1.id1
 JOIN highschooler h2 ON l1.id2 = h2.ID
 WHERE h2.ID NOT IN (
-	SELECT ID1 
+  SELECT ID1 
   FROM likes
 );
 
@@ -60,10 +60,10 @@ WHERE h2.ID NOT IN (
 SELECT h1.name, h1.grade
 FROM highschooler h1
 WHERE h1.id NOT IN (
-	SELECT f.id1 
-	FROM friend f
-	JOIN highschooler h2 ON f.id2 = h2.id
-	WHERE h1.grade <> h2.grade
+  SELECT f.id1 
+  FROM friend f
+  JOIN highschooler h2 ON f.id2 = h2.id
+  WHERE h1.grade <> h2.grade
 )
 ORDER BY h1.grade, h1.name;
 
@@ -76,11 +76,13 @@ JOIN likes l1 ON h1.id = l1.id1
 JOIN highschooler h2 ON l1.id2 = h2.id
 JOIN friend f1 ON h1.id = f1.id1
 JOIN friend f2 ON h2.id = f2.id1
+-- check that friend C is friends with both A and B
 JOIN highschooler h3 ON h3.id = f1.id2 AND h3.id = f2.id2
+-- check that student B who is liked is not friends with student A who likes them
 WHERE l1.id2 NOT IN (
-	SELECT id2 
-	FROM friend
-	WHERE id1 = h1.id
+  SELECT id2 
+  FROM friend
+  WHERE id1 = h1.id
 );
 
 
@@ -117,10 +119,10 @@ WHERE h1.id <> h3.id;
 SELECT h1.name, h1.grade
 FROM highschooler h1
 WHERE h1.id NOT IN (
-	SELECT f.id1 
-	FROM friend f
-	JOIN highschooler h2 ON f.id2 = h2.id
-	WHERE h2.grade = h1.grade
+  SELECT f.id1 
+  FROM friend f
+  JOIN highschooler h2 ON f.id2 = h2.id
+  WHERE h2.grade = h1.grade
 );
 
 
@@ -128,43 +130,27 @@ WHERE h1.id NOT IN (
 
 SELECT AVG(ct)
 FROM (
-	SELECT COUNT(*) ct
-	FROM friend
-	GROUP BY id1
+  SELECT COUNT(*) ct
+  FROM friend
+  GROUP BY id1
 );
 
 
 -- 4. Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. Do not count Cassandra, even though technically she is a friend of a friend.
 
-SELECT ff + f
-FROM (
-  -- find the number of friends of friends of Cassandra
-  SELECT COUNT(*) ff
-  FROM Friend 
-  WHERE ID1 IN (
-    SELECT ID2
-    FROM Friend
-    WHERE ID1 = (
-      SELECT ID
-      FROM Highschooler
-      WHERE name = 'Cassandra'
-    )
-  ) 
-      -- exclude counting Cassandra as a friend of a friend
-  AND ID2 <> (
-    SELECT ID
-    FROM Highschooler
-    WHERE name = 'Cassandra'
-  )
-)
-JOIN (
-  -- count friends of Cassandra
- SELECT COUNT(ID2) f
- FROM Friend
- WHERE ID1 = (
-    SELECT ID
-    FROM Highschooler
-    WHERE name = 'Cassandra')
+SELECT COUNT(DISTINCT f1.id2) + COUNT(DISTINCT f2.id2)
+FROM highschooler hs
+JOIN friend f1 ON hs.id = f1.id1
+JOIN friend f2 ON f1.id2 = f2.id1
+WHERE hs.name = 'Cassandra'
+-- exclude Cassandra from count of friends of friends
+AND f2.id2 <> f1.id1
+-- exclude Cassandra's friends from count of friends of friends
+AND f2.id2 NOT IN (
+  SELECT f1.id2
+  FROM highschooler hs
+  JOIN friend f1 ON hs.id = f1.id1
+  WHERE hs.name = 'Cassandra'
 );
 
 
@@ -174,11 +160,12 @@ SELECT name, grade
 FROM highschooler h
 JOIN friend f ON h.id = f.id1
 GROUP BY id1
+-- compare the number of friends with the maximum number of friends
 HAVING COUNT(*) >= (
-	SELECT MAX(num)
-	FROM (
-		SELECT COUNT(*) AS num
-		FROM friend
-		GROUP BY id1
-	)
+  SELECT MAX(num)
+  FROM (
+    SELECT COUNT(*) AS num
+    FROM friend
+    GROUP BY id1
+  )
 );
